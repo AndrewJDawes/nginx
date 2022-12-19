@@ -7,7 +7,7 @@ eval_cmd_base="docker push $PROJECT_DOCKER_FULL_PATH"
 
 
 # eval_cmd="docker buildx build --push --platform linux/arm64/v8 --tag $PROJECT_DOCKER_FULL_PATH ."
-#eval_cmd="docker buildx build --push --platform linux/amd64,linux/arm64/v8 --tag $PROJECT_DOCKER_FULL_PATH ."
+# eval_cmd="docker buildx build --push --platform linux/amd64,linux/arm64/v8 --tag $PROJECT_DOCKER_FULL_PATH ."
 
 # AMD64
 eval_cmd_amd="docker push ${PROJECT_DOCKER_FULL_PATH}-amd64"
