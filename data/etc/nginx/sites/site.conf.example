@@ -1,0 +1,34 @@
+server {
+    listen 80;
+    server_name ${domain};
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot/${domain};
+    }
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+server {
+    listen 443 ssl;
+    server_name ${domain};
+
+    ssl_certificate /etc/nginx/site_certs/${domain}/fullchain.pem;
+    ssl_certificate_key /etc/nginx/site_certs/${domain}/privkey.pem;
+
+    include /etc/nginx/includes/options-ssl-nginx.conf;
+
+    ssl_dhparam /etc/nginx/global_certs/ssl-dhparams.pem;
+
+    include /etc/nginx/includes/hsts.conf;
+
+    location / {
+        include /etc/nginx/includes/proxy.conf;
+        # Where ${ip} must be an IP, not hostname, and is likely the IP of the HOST container is running on - or another host.
+        # Protocol must be specified - leave as http unless you also have a cert installed on upstream
+        set $upstream http://${ip}:${port};
+        proxy_pass $upstream;
+    }
+}

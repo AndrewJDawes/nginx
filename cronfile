@@ -1,0 +1,3 @@
+# Run cron
+SHELL=/bin/bash
+*/5 * * * * echo "$(date): Cron" >> /app/cron.log 2>&1 && /app/scripts/site_certs.sh >> /app/cron.log 2>&1 && nginx -s reload >> /app/cron.log 2>&1
