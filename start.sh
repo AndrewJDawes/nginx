@@ -4,7 +4,7 @@ if [ -f "getenv.sh" ]; then
 fi
 eval_cmd="docker run \
 -d \
---restart=always \
+--restart=unless-stopped \
 --name $PROJECT_DOCKER_CONTAINER_NAME \
 -p 80:80 \
 -p 443:443 \
