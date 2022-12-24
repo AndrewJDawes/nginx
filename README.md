@@ -6,7 +6,7 @@
 
 [Article with examples](https://deliciousbrains.com/ssl-certificate-authority-for-local-https-development/#becoming-certificate-authority)
 `cd data/ca_certs`
-`openssl genrsa -des3 -out CA.key 2048`
+`openssl genrsa -out CA.key 2048`
 `openssl req -x509 -new -nodes -key CA.key -sha256 -days 1825 -out CA.pem`
 
 ### NGINX Config
