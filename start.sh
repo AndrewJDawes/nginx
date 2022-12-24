@@ -15,6 +15,7 @@ eval_cmd="docker run \
 --network=$network_name \
 -p 80:80 \
 -p 443:443 \
+-v "$(pwd)"/data/ca_certs:/app/data/ca_certs:ro \
 -v "$(pwd)"/data/etc/nginx/sites:/etc/nginx/sites:ro \
 -v "$(pwd)"/data/etc/nginx/conf.d:/etc/nginx/conf.d:ro \
 -v site_certs:/etc/nginx/site_certs:rw \
