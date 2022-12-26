@@ -15,7 +15,13 @@ sign_domain_cert() {
 
   # Generate a key for the domain
   openssl genrsa -out "/etc/nginx/site_certs/$domain/privkey.pem" 2048
-  openssl req -new -key "/etc/nginx/site_certs/$domain/privkey.pem" -out "/etc/nginx/site_certs/$domain/child.csr"
+  
+  openssl req \
+  -new \
+  -key "/etc/nginx/site_certs/$domain/privkey.pem" \
+  -out "/etc/nginx/site_certs/$domain/child.csr" \
+  -subj "/CN=${domain}"
+
   cat > "/etc/nginx/site_certs/$domain/openssl.cnf" << EOF
 authorityKeyIdentifier=keyid,issuer
 basicConstraints=CA:FALSE
@@ -32,7 +38,7 @@ EOF
   -CAkey "/app/data/ca_certs/CA.key" \
   -CAcreateserial \
   -out "/etc/nginx/site_certs/$domain/fullchain.pem" \
-  -days 825 
+  -days 825 \
   -sha256 \
   -extfile "/etc/nginx/site_certs/$domain/openssl.cnf"
 
