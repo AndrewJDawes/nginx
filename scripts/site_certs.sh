@@ -12,21 +12,44 @@ fi
 
 sign_domain_cert() {
   local domain="$1"
-  # Populate CSR config file
-  printf "[dn]\nCN=${domain}\n[req]\ndistinguished_name = dn\n[EXT]\nsubjectAltName=DNS:$domain\nkeyUsage=digitalSignature\nextendedKeyUsage=serverAuth" > "/etc/nginx/site_certs/$domain/openssl.cnf"
-  # Generate CSR
-  # Generate a CSR
-  openssl req \
+
+  # Generate a key for the domain
+  openssl genrsa -out "/etc/nginx/site_certs/$domain/privkey.pem" 2048
+  openssl req -new -key "/etc/nginx/site_certs/$domain/privkey.pem" -out "/etc/nginx/site_certs/$domain/child.csr"
+  cat > "/etc/nginx/site_certs/$domain/openssl.cnf" << EOF
+authorityKeyIdentifier=keyid,issuer
+basicConstraints=CA:FALSE
+keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
+subjectAltName = @alt_names
+[alt_names]
+DNS.1 = $domain
+EOF
+
+  openssl x509 \
+  -req \
+  -in "/etc/nginx/site_certs/$domain/child.csr" \
+  -CA "/app/data/ca_certs/CA.pem" \
+  -CAkey "/app/data/ca_certs/CA.key" \
+  -CAcreateserial \
+  -out "/etc/nginx/site_certs/$domain/fullchain.pem" \
+  -days 825 
   -sha256 \
-  -nodes \
-  -newkey rsa:2048 \
-  -keyout "/etc/nginx/site_certs/$domain/privkey.pem" \
-  -out "/etc/nginx/site_certs/$domain/child.csr" \
-  -config "/etc/nginx/site_certs/$domain/openssl.cnf" \
-  -subj "/CN=${domain}" \
-  -extensions EXT
+  -extfile "/etc/nginx/site_certs/$domain/openssl.cnf"
+
+  # Populate CSR config file
+  # printf "[dn]\nCN=${domain}\n[req]\ndistinguished_name = dn\n[EXT]\nsubjectAltName=DNS:$domain\nkeyUsage=digitalSignature\nextendedKeyUsage=serverAuth" > "/etc/nginx/site_certs/$domain/openssl.cnf"
+  # Generate a CSR
+  # openssl req \
+  # -sha256 \
+  # -nodes \
+  # -newkey rsa:2048 \
+  # -keyout "/etc/nginx/site_certs/$domain/privkey.pem" \
+  # -out "/etc/nginx/site_certs/$domain/child.csr" \
+  # -config "/etc/nginx/site_certs/$domain/openssl.cnf" \
+  # -subj "/CN=${domain}" \
+  # -extensions EXT
   # Sign CSR using CA cert and CA key
-  openssl x509 -req -in "/etc/nginx/site_certs/$domain/child.csr" -days 365 -CA "/app/data/ca_certs/CA.pem" -CAkey "/app/data/ca_certs/CA.key" -set_serial 01 -out "/etc/nginx/site_certs/$domain/fullchain.pem"
+  # openssl x509 -req -in "/etc/nginx/site_certs/$domain/child.csr" -days 365 -CA "/app/data/ca_certs/CA.pem" -CAkey "/app/data/ca_certs/CA.key" -set_serial 01 -out "/etc/nginx/site_certs/$domain/fullchain.pem"
 
 }
 
