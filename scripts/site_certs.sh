@@ -12,34 +12,39 @@ fi
 
 sign_domain_cert() {
   local domain="$1"
-  openssl genrsa -out "/etc/nginx/site_certs/$domain/privkey.pem" 2048
+  # Populate CSR config file
   printf "[dn]\nCN=${domain}\n[req]\ndistinguished_name = dn\n[EXT]\nsubjectAltName=DNS:$domain\nkeyUsage=digitalSignature\nextendedKeyUsage=serverAuth" > "/etc/nginx/site_certs/$domain/openssl.cnf"
+  # Generate CSR
+  # Generate a CSR
   openssl req \
-  -new \
-  -key "/etc/nginx/site_certs/$domain/privkey.pem" \
-  -out "/etc/nginx/site_certs/$domain/child.csr" \
   -sha256 \
+  -nodes \
+  -newkey rsa:2048 \
+  -keyout "/etc/nginx/site_certs/$domain/privkey.pem" \
+  -out "/etc/nginx/site_certs/$domain/child.csr" \
+  -config "/etc/nginx/site_certs/$domain/openssl.cnf" \
   -subj "/CN=${domain}" \
-  -extensions EXT \
-  -config "/etc/nginx/site_certs/$domain/openssl.cnf"
-
+  -extensions EXT
+  # Sign CSR using CA cert and CA key
   openssl x509 -req -in "/etc/nginx/site_certs/$domain/child.csr" -days 365 -CA "/app/data/ca_certs/CA.pem" -CAkey "/app/data/ca_certs/CA.key" -set_serial 01 -out "/etc/nginx/site_certs/$domain/fullchain.pem"
 
 }
 
 fake_domain_cert() {
   local domain="$1"
+  # Populate CSR config file
   printf "[dn]\nCN=${domain}\n[req]\ndistinguished_name = dn\n[EXT]\nsubjectAltName=DNS:$domain\nkeyUsage=digitalSignature\nextendedKeyUsage=serverAuth" > "/etc/nginx/site_certs/$domain/openssl.cnf"
+  # Generate a self signed certificate
   openssl req \
   -x509 \
-  -out "/etc/nginx/site_certs/$domain/fullchain.pem" \
-  -keyout "/etc/nginx/site_certs/$domain/privkey.pem" \
-  -newkey rsa:2048 \
-  -nodes \
   -sha256 \
+  -nodes \
+  -newkey rsa:2048 \
+  -keyout "/etc/nginx/site_certs/$domain/privkey.pem" \
+  -out "/etc/nginx/site_certs/$domain/fullchain.pem" \
+  -config "/etc/nginx/site_certs/$domain/openssl.cnf" \
   -subj "/CN=${domain}" \
-  -extensions EXT \
-  -config "/etc/nginx/site_certs/$domain/openssl.cnf"
+  -extensions EXT
 }
 
 # domains_fixed=$(echo "$DOMAINS" | tr -d \")
