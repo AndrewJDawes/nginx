@@ -12,6 +12,7 @@ eval_cmd="docker run \
 -d \
 --restart=unless-stopped \
 --name $PROJECT_DOCKER_CONTAINER_NAME \
+--env CSR_REQUEST_ENDPOINT=${CSR_REQUEST_ENDPOINT-'ca-certificate-service/domain'} \
 --network=$network_name \
 -p 80:80 \
 -p 443:443 \
