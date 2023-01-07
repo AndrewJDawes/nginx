@@ -40,6 +40,11 @@
 -   Copy `data/etc/nginx/sites/site.conf.example` to `data/etc/nginx/sites/<YOUR_HOST>.conf` where `<YOUR_HOST>` is your domain name - like `hello-world.com.conf`.
 -   Edit the copied .conf file to replace `${DOMAIN}` with your domain
 
+## Force immediate cert renewal
+
+`docker exec nginx /bin/bash /app/scripts/site_certs.sh`
+
+
 ## Hot reload NGINX
 
 `docker exec nginx nginx -s reload`
