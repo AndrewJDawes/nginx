@@ -3,7 +3,9 @@ server {
     server_name ${domain};
 
     location / {
-        return 301 https://$host$request_uri;
+        # Preserve the HTTP method and headers in redirect
+        # https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/307#:~:text=HTTP%20307%20Temporary%20Redirect%20redirect,to%20perform%20the%20redirected%20request.
+        return 307 https://$host$request_uri;
     }
 }
 
