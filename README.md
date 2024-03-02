@@ -1,6 +1,6 @@
 # NGINX Docker image
 
-## Get started
+## Getting started
 
 ### OPTION 1 - Use a CSR signing endpoint
 
