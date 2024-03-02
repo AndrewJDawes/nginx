@@ -1,0 +1,17 @@
+version: "3.8"
+services:
+    nginx:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        restart: unless-stopped
+        volumes:
+            - ./dev/data/etc/nginx/sites:/etc/nginx/sites:ro
+            - ./dev/data/etc/nginx/conf.d:/etc/nginx/conf.d:ro
+            - ./dev/data/etc/nginx/site_certs:/etc/nginx/site_certs:rw
+            - ./dev/data/etc/nginx/global_certs:/etc/nginx/global_certs:rw
+        ports:
+            - "80:80"
+            - "443:443"
+        environment:
+            - CSR_REQUEST_ENDPOINT=${CSR_REQUEST_ENDPOINT-'ca-certificate-service/domain'}

@@ -1,0 +1,20 @@
+version: "3.8"
+services:
+    nginx:
+        image: ghcr.io/andrewjdawes/nginx:latest
+        restart: unless-stopped
+        ports:
+            - "80:80"
+            - "443:443"
+        volumes:
+            - nginx_sites:/etc/nginx/sites:ro
+            - nginx_conf_d:/etc/nginx/conf.d:ro
+            - nginx_site_certs:/etc/nginx/site_certs:rw
+            - nginx_global_certs:/etc/nginx/global_certs:rw
+        environment:
+            - CSR_REQUEST_ENDPOINT=${CSR_REQUEST_ENDPOINT-'ca-certificate-service/domain'}
+volumes:
+    nginx_sites:
+    nginx_conf_d:
+    nginx_site_certs:
+    nginx_global_certs:

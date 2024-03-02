@@ -1,5 +1,4 @@
-ARG ARCH=
-FROM ${ARCH}nginx:1.23.2-alpine
+FROM nginx:1.23.2-alpine
 
 EXPOSE 80 443
 

@@ -1,26 +1,52 @@
 #!/usr/bin/env bash
-if [ -f "getenv.sh" ]; then
-    source getenv.sh
+# check if ENVIRONMENT is set
+usage() {
+    echo "Usage: run.sh <up|stop|down|rm>"
+    exit 1
+}
+if [ -z "$ENVIRONMENT" ]; then
+    echo "ENVIRONMENT is not set - defaulting to dev"
+    export ENVIRONMENT=dev
+fi
+# check if $1 is set
+if [ -z "$1" ]; then
+    echo "No argument supplied"
+    usage
+fi
+echo "ENVIRONMENT is set to $ENVIRONMENT"
+docker_compose_args="--project-directory ."
+if [ "$ENVIRONMENT" = "dev" ]; then
+    # docker_compose_args="--env-file dev/.env -f docker-compose.yml -f dev/docker-compose.yml"
+    docker_compose_args="$docker_compose_args -f dev/docker-compose.yml"
 fi
 
-# Attach to nginx-reverse-proxy network
-network_name="nginx-reverse-proxy"
-network_cmd="docker network inspect $network_name || docker network create $network_name"
-eval "$network_cmd"
-
-eval_cmd="docker run \
--d \
---restart=unless-stopped \
---name $PROJECT_DOCKER_CONTAINER_NAME \
---env CSR_REQUEST_ENDPOINT=${CSR_REQUEST_ENDPOINT-'ca-certificate-service/domain'} \
---network=$network_name \
--p 80:80 \
--p 443:443 \
--v "$(pwd)"/data/ca_certs:/app/data/ca_certs:rw \
--v "$(pwd)"/data/etc/nginx/sites:/etc/nginx/sites:ro \
--v "$(pwd)"/data/etc/nginx/conf.d:/etc/nginx/conf.d:ro \
--v site_certs:/etc/nginx/site_certs:rw \
--v global_certs:/etc/nginx/global_certs:rw \
-$PROJECT_DOCKER_FULL_PATH \
-"
-eval "$eval_cmd"
+if [ "$1" = "up" ]; then
+    echo "Starting the application"
+    command="docker compose $docker_compose_args up -d --pull always"
+    echo $command
+    exec $command
+    exit 0
+fi
+if [ "$1" = "stop" ]; then
+    echo "Stopping the application"
+    command="docker compose $docker_compose_args stop"
+    echo $command
+    exec $command
+    exit 0
+fi
+if [ "$1" = "down" ]; then
+    echo "Stopping and removing the application"
+    command="docker compose $docker_compose_args down"
+    echo $command
+    exec $command
+    exit 0
+fi
+if [ "$1" = "rm" ]; then
+    echo "Removing the application"
+    command="docker compose $docker_compose_args rm --force --stop --volumes"
+    echo $command
+    exec $command
+    exit 0
+fi
+echo "Invalid argument"
+usage
